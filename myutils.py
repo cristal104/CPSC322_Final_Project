@@ -1,5 +1,7 @@
 import csv
 import math
+import numpy as np
+import random
 
 # general util funtions 
 def read_csv_to_table(filename):
@@ -44,6 +46,15 @@ def get_column(table, header, col_name):
         if value != "NA":
             col.append(value)
     return col
+
+def change_isFraud(table, header, col_name):
+    col_index = header.index(col_name)
+    for row in table:
+        value = row[col_index]
+        if value == '0':
+            row[col_index] = "no"
+        if value == '1':
+            row[col_index] = "yes"
 
 def dictionary_to_list(dictionary):
     x_list = list(dictionary.keys())
@@ -127,6 +138,73 @@ def get_column_no_header(table, table_index):
         if value != "NA":
             col.append(value)
     return col
+
+def shuffle_parallel(array1, array2, random_seed):
+    """shuffles two lists that are parallel to each other
+    Args:
+        array1(list of obj): list being shuffled
+        array2(list of obj): list being shuffled
+        random_seed(obj): number for random_seed
+    Returns:
+        list1, list2(list of obj): lists shuffled in parallel order
+    Notes:
+         This function can be used for any file
+    """
+    array1 = np.array(array1)
+    array2 = np.array(array2)
+    random.seed(random_seed)
+    randomize = np.arange(len(array2))
+    random.shuffle(randomize)
+    array1 = array1[randomize]
+    array2 = array2[randomize]
+    list1 = array1.tolist()
+    list2 = array2.tolist()
+    return list1, list2
+
+def compute_holdout_partitions_float(table, test_size):
+    """Comptutes partitions for float
+    Args:
+        table(list of list of obj): 2D list
+        test_size(obj): number being subtracted to find index
+    Returns:
+    Notes:
+         This function can be used for any file
+    """
+    # randomize the table
+    randomized = table[:] # copy the table
+    n = len(table)
+    test_size = 1 - test_size
+    split_index = int(test_size * n) # 2/3 of randomized table is train, 1/3 is test
+    return randomized[0:split_index], randomized[split_index:]
+
+def compute_holdout_partitions_int(table, test_size):
+    """Comptutes partitions for integer
+    Args:
+        table(list of list of obj): 2D list
+        test_size(obj): number being subtracted to find index
+    Notes:
+         This function can be used for any file
+    """
+    # randomize the table
+    randomized = table[:] # copy the table# 2/3 of randomized table is train, 1/3 is test
+    split_index = len(randomized) - test_size
+    return  randomized[0: len(randomized) - test_size], randomized[split_index:]
+    
+def randomize_in_place(a_list: list, parallel_list:list=None, random_state:int=None):
+    """Shuffles the given list. If a parallel list is given, both lists are shuffled in parallel.
+
+    Args:
+        a_list (list of obj): list to be shuffled
+        parallel_list (list of obj): OPTIONAL list to be shuffled in parallel with a_list
+        random_state (int): integer used for seeding a random number generator for reproducible results
+    """
+    if random_state is not None:
+        np.random.seed(random_state)
+    for index in range(0, len(a_list)):
+        random_index = np.random.randint(0, len(a_list))
+        a_list[index], a_list[random_index] = a_list[random_index], a_list[index]
+        if parallel_list != None:
+            parallel_list[index], parallel_list[random_index] = parallel_list[random_index], parallel_list[index]
 
 # MyDecisionTreeClassifier util functions
 def compute_entropy(instances):

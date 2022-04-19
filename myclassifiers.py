@@ -224,7 +224,6 @@ class MyDummyClassifier:
         # find what the most frequent instance in y-predicted should be
         # and store in self.most_common_label
         self.most_common_label = myutils.common_instance(y_train)
-        print(self.most_common_label)
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
