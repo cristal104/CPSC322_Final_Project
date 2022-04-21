@@ -35,9 +35,11 @@ def train_test_split(X, y, test_size=0.33, random_state=None, shuffle=True):
     if type(test_size) == float:
         X_train, X_test = myutils.compute_holdout_partitions_float(X, test_size)
         y_train, y_test = myutils.compute_holdout_partitions_float(y, test_size)
+        # X_test, y_test = myutils.shuffle_parallel(X_test, y_test, random_state)
     else:
         X_train, X_test = myutils.compute_holdout_partitions_int(X, test_size)
         y_train, y_test = myutils.compute_holdout_partitions_int(y, test_size)  
+        # X_test, y_test = myutils.shuffle_parallel(X_test, y_test, random_state)
     
     return X_train, X_test, y_train, y_test 
 
