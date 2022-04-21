@@ -310,6 +310,15 @@ def get_frequencies_mod(table, index):
     return values, counts 
 
 def get_frequencies_given(col):
+    """Gets frequency from a 2D list given a single column
+    Args:
+        col(list of obj): single column
+    Returns:
+        values(list of obj): list of values
+        counts(list of obj): list of frequency of values
+    Notes:
+        This function can be used for any file, functions similar to get_frequencies()
+    """
     col.sort() 
     values = []
     counts = []

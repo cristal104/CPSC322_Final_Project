@@ -2,7 +2,7 @@ import myutils
 import math
 import copy
 
-class MyRandomForestClassifier():
+class MyRandomForestClassifier:
 
     def __init__(self) -> None:
         pass
@@ -223,7 +223,8 @@ class MyDummyClassifier:
         """
         # find what the most frequent instance in y-predicted should be
         # and store in self.most_common_label
-        self.most_common_label = myutils.common_instance(y_train)
+        # self.most_common_label = myutils.common_instance(y_train)
+        self.most_common_label = max(y_train)
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -236,6 +237,6 @@ class MyDummyClassifier:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
         y_predicted = []
-        for i, _ in enumerate(X_test):
-            y_predicted.append([self.most_common_label]) 
+        for _ , _ in enumerate(X_test):
+            y_predicted.append(self.most_common_label) 
         return y_predicted
