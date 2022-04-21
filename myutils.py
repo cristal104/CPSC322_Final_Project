@@ -48,6 +48,15 @@ def get_column(table, header, col_name):
     return col
 
 def change_isFraud(table, header, col_name):
+    """Changes the binary classification for "isFraud"
+
+Args:
+    table(list of list of obj): 2D list for dataset
+    header(list of obj): 1D list of class attributes parallel to table
+
+Notes:
+    This function only works to change the binary class labels for "isFraud" class attributes
+"""
     col_index = header.index(col_name)
     for row in table:
         value = row[col_index]
@@ -57,11 +66,27 @@ def change_isFraud(table, header, col_name):
             row[col_index] = "yes"
 
 def dictionary_to_list(dictionary):
+    '''fits a dictionary into two lists, one list for keys and one list of values 
+    Args:
+        dictionary(dict of obj): dictionary with key-value pairs
+    Returns:
+        x_list(list of obj): list with keys from dictionary
+        y_list(list of obj): list with values from dictionary
+    '''
     x_list = list(dictionary.keys())
     y_list = list(dictionary.values())
     return x_list, y_list
 
 def get_frequencies(table, header, col_name):
+    """Gets the frequency of instances and returns results in a list
+    Args:
+        table(list of list of obj): 2D list with dataset
+        header(list of obj): 1D list parallel to table
+        col_name(obj): Name of column being analyzed
+    Returns:
+        values(list of obj): list of unique instances in col_name
+        counts(list of obj): lisf of count of values in col_name
+    """
     col = get_column(table, header, col_name)
     col.sort() # inplace 
     # parallel lists
@@ -76,6 +101,14 @@ def get_frequencies(table, header, col_name):
     return values, counts
 
 def drop_cols(table, header, col_name):
+    """Deletes a given column from a 2D list
+    Args:
+        table(list of list of obj: 2D list holding dataset
+        header(list of obj): 1D list parallel to table
+        col_name(obj): name of column being deleted
+    Notes: 
+        This function does not return a new table and header
+    """
     col_index = header.index(col_name)
     for col in table:
         del col[col_index]
@@ -125,7 +158,7 @@ def get_column_no_header(table, table_index):
     """Extracts a column from a 2D list without needing a header
     Args:
         table(list of list of obj): 2D list in where column is going to be extracted from
-        table index(obj): index where column should be extracted
+        table_index(obj): index where column should be extracted
     Returns:
         col(list of obj): extracted column
     Notes:
