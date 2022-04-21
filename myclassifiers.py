@@ -240,3 +240,100 @@ class MyDummyClassifier:
         for _ , _ in enumerate(X_test):
             y_predicted.append(self.most_common_label) 
         return y_predicted
+        
+class MyKNeighborsClassifier:
+    """Represents a simple k nearest neighbors classifier.
+
+    Attributes:
+        n_neighbors(int): number of k neighbors
+        X_train(list of list of numeric vals): The list of training instances (samples).
+                The shape of X_train is (n_train_samples, n_features)
+        y_train(list of obj): The target y values (parallel to X_train).
+            The shape of y_train is n_samples
+
+    Notes:
+        Loosely based on sklearn's KNeighborsClassifier:
+            https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+        Terminology: instance = sample = row and attribute = feature = column
+        Assumes data has been properly normalized before use.
+    """
+    def __init__(self, n_neighbors=3):
+        """Initializer for MyKNeighborsClassifier.
+
+        Args:
+            n_neighbors(int): number of k neighbors
+        """
+        self.n_neighbors = n_neighbors
+        self.X_train = None
+        self.y_train = None
+
+    def fit(self, X_train, y_train):
+        """Fits a kNN classifier to X_train and y_train.
+
+        Args:
+            X_train(list of list of numeric vals): The list of training instances (samples).
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+
+        Notes:
+            Since kNN is a lazy learning algorithm, this method just stores X_train and y_train
+        """
+        self.X_train = X_train
+        self.y_train = y_train
+
+    def kneighbors(self, X_test):
+        """Determines the k closes neighbors of each test instance.
+
+        Args:
+            X_test(list of list of numeric vals): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+
+        Returns:
+            distances(list of list of float): 2D list of k nearest neighbor distances
+                for each instance in X_test
+            neighbor_indices(list of list of int): 2D list of k nearest neighbor
+                indices in X_train (parallel to distances)
+        """
+        k_distances = []
+        k_index = []
+
+        # calculate distance
+        for index, _ in enumerate(X_test):
+            neighbor_index = []
+            distances = []
+            for i, train_instance in enumerate(self.X_train):
+                distance = myutils.compute_euclidean_distance(train_instance, X_test[index])
+                neighbor_index.append(i)
+                distances.append(distance)
+            k_distances.append(distances)
+            k_index.append(neighbor_index)
+        for index, _ in enumerate(k_distances):
+            k_distances[index], k_index[index] = myutils.sort_lists(k_distances[index], k_index[index])
+
+        for index, _ in enumerate(k_distances):
+            k_distances[index] = k_distances[index][:self.n_neighbors]
+            k_index[index] = k_index[index][:self.n_neighbors]
+        return k_distances, k_index
+
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+
+        Args:
+            X_test(list of list of numeric vals): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        _ , neighbor_index = MyKNeighborsClassifier.kneighbors(self, X_test) 
+        y_predicted = []
+
+        for index , _ in enumerate(neighbor_index):
+            y_predicted_list = []
+            temp_list = neighbor_index[index]
+            for _ , instances in enumerate(temp_list):
+                y_predicted_list.append(self.y_train[instances])
+            y_predicted.append([myutils.common_instance(y_predicted_list)])  
+
+        return y_predicted 
