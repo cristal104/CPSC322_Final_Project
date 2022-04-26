@@ -204,12 +204,22 @@ def confusion_matrix(y_true, y_pred, labels):
         Loosely based on sklearn's confusion_matrix():
             https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
     """
-    matrix = [[0 for _ in labels] for _ in labels]
+    # matrix = [[0 for _ in labels] for _ in labels]
+    # for i in range(len(y_pred)):
+    #     predicted_value = y_pred[i]
+    #     true_value = y_true[i]
+    #     matrix[labels.index(true_value)][labels.index(predicted_value)] += 1
+    # return matrix
+
+    # LUKE
+    confusion_matrix = [[0 for i in labels] for i in labels]
+
     for i in range(len(y_pred)):
-        predicted_value = y_pred[i]
-        true_value = y_true[i]
-        matrix[labels.index(true_value)][labels.index(predicted_value)] += 1
-    return matrix
+        predicted = y_pred[i]
+        actual = y_true[i]
+        confusion_matrix[labels.index(actual)][labels.index(predicted)] += 1
+
+    return confusion_matrix
 
 def accuracy_score(y_true, y_pred, normalize=True):
     """Compute the classification prediction accuracy score.

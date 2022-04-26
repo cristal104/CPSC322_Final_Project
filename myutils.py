@@ -2,6 +2,7 @@ import csv
 import math
 import numpy as np
 import random
+import copy
 
 # general util funtions 
 def read_csv_to_table(filename):
@@ -472,3 +473,73 @@ def common_instance(list):
     """
     return max(list, key = list.count)
 
+def get_priors_and_posteriors(X_train, y_train):
+    '''
+    Creates labels(1D list of all possible class labels), priors(dict), and posteriors(dict)
+    
+    Args:
+        X_train(list of list of obj): The list of training instances (samples)
+            The shape of X_train is (n_train_samples, n_features)
+        y_train(list of obj): The target y values (parallel to X_train)
+            The shape of y_train is n_train_samples
+    
+    Returns: labels, priors, and posteriors
+    '''
+    labels = []
+    for i in range(len(y_train)):
+        if y_train[i] not in labels:
+            labels.append(y_train[i])
+
+    priors = {}
+    posteriors = {}
+    for i in range(len(labels)):
+        priors[labels[i]] = 0
+        posteriors[labels[i]] = {}
+
+    for i in range(len(y_train)):
+        for key in priors.keys():
+            if y_train[i] == key:
+                priors[key] += 1
+
+    for key in priors.keys():
+        priors[key] = priors[key] / len(y_train)
+
+    attributes = {}
+    i = 1
+    for j in range(len(X_train[0])):
+        attributes[f"att{i}"] = {}
+        i += 1
+
+    col_idx = 0
+    for key in attributes.keys():
+        for i in range(len(X_train)):
+            attributes[key][X_train[i][col_idx]] = 0
+        col_idx += 1
+
+    for key in posteriors.keys():
+        posteriors[key] = copy.deepcopy(attributes)
+
+    # posteriors
+    labels_instances_count = [] # parallel to labels
+    for key in posteriors.keys():
+        indices = []
+        for i in range(len(y_train)):
+            if y_train[i] == key:
+                indices.append(i)
+        labels_instances_count.append(len(indices))
+        col_idx = 0
+        for key2 in posteriors[key].keys():
+            for key3 in posteriors[key][key2].keys():
+                for i in range(len(indices)):
+                    if X_train[indices[i]][col_idx] == key3 and y_train[indices[i]] == key:
+                        posteriors[key][key2][key3] = posteriors[key][key2][key3] + 1
+            col_idx += 1
+
+    i = 0
+    for key in posteriors.keys():
+        for key2 in posteriors[key].keys():
+            for key3 in posteriors[key][key2].keys():
+                posteriors[key][key2][key3] = posteriors[key][key2][key3] / labels_instances_count[i]
+        i += 1
+
+    return labels, priors, posteriors

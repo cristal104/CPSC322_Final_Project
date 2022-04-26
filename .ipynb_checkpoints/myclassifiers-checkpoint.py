@@ -1,5 +1,4 @@
 import myutils
-import myutilsL
 import math
 import copy
 
@@ -52,37 +51,23 @@ class MyDecisionTreeClassifier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
-
-        # TODO: programmatically create a header (e.g. ["att0", "att1",
-        # ...] and create an attribute domains dictionary)
+        # create attribute domain dictionary and header beforehand
         header = []
-        x = 0
+        attribute_domain = {}
         for i in range(len(X_train[0])):
-            header.append(f"att{x}")
-            x += 1
-        #att_domains = myutils.create_domains(header, X_train)
-        att_domains = {}
-        count = 0
-        for item in header:
-            curr_col = myutilsL.get_column(X_train, count)
-            values, counts = myutilsL.get_frequencies(curr_col)
-            att_domains[item] = values
-            count+=1
+            header.append(f"att{i}")
 
-        # next, I advise stitching X_train and y_train together
+        for index, value in enumerate(header):
+            col = myutils.get_column_no_header(X_train, index)
+            values, _ = myutils.get_frequencies_given(col)
+            attribute_domain[value] = values
+        
+        # create tree :)
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
-        # now, making a copy of the header because tdidt()
-        # is going to modify the list
         available_attributes = header.copy()
-        # recall: python is pass by object reference
-        tree = myutilsL.tdidt(train, available_attributes, header, att_domains)
-        #print("tree:", tree)
+        tree = myutils.tdidt(train, available_attributes, attribute_domain, header)
         self.tree = tree
-        # note: the unit test will assert tree == interview_tree_solution
-        # (mind the attribute value order)
-
-        #pass # TODO: fix this
-
+            
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
 
@@ -94,12 +79,10 @@ class MyDecisionTreeClassifier:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
         y_predicted = []
-        for item in X_test:
-            y_predict = myutilsL.predict_helper(item,self.tree)
-            y_predicted.append(y_predict[1])
-
+        for value in X_test:
+            y_predicted_values = myutils.predict_tree(value, self.tree)
+            y_predicted.append(y_predicted_values[1])
         return y_predicted
-        #return [] # TODO: fix this
 
 class MyNaiveBayesClassifier:
     """Represents a Naive Bayes classifier.
