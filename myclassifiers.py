@@ -2,6 +2,7 @@ import myutils
 import myutilsL
 import math
 import copy
+import random
 
 class MyRandomForestClassifier:
 
@@ -329,3 +330,124 @@ class MyKNeighborsClassifier:
             y_predicted.append([myutils.common_instance(y_predicted_list)])  
 
         return y_predicted 
+
+
+class MyRandomForestClassifier:
+    """Represents a decision tree classifier.
+    Attributes:
+        N(int): Number of Classifiers to develop
+        M(int): Number of better Classifiiers to use
+        F(int): Size of random attribute subset
+        X_train(list of list of obj): The list of training instances (samples)
+                The shape of X_train is (n_train_samples, n_features)
+        trees(list of nested lists): list of trees generated
+    Notes:
+        Loosely based on sklearn's DecisionTreeClassifier: https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
+        Terminology: instance = sample = row and attribute = feature = column
+    """
+    def __init__(self, n = 20, m = 7, f = 2, seed = None):
+        """Initializer for MyDecisionTreeClassifier.
+        """
+
+        self.N = n
+        self.M = m
+        self.F = f
+        self.X_train = None 
+        self.y_train = None
+        self.trees = []
+        self.seed = seed
+
+    def fit(self, X_train, y_train):
+        """Fits a decision tree classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm.
+        Args:
+            X_train(list of list of obj): The list of training instances (samples). 
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+        Notes:
+            Since TDIDT is an eager learning algorithm, this method builds a decision tree model
+                from the training data.
+            Build a decision tree using the nested list representation described in class.
+            Store the tree in the tree attribute.
+            Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
+        """
+         # fit() accepts X_train and y_train
+        # TODO: calculate the attribute domains dictionary
+
+        if (self.seed != None):
+            random.seed(self.seed)
+            
+        n_trees = []
+        accuracies = []
+        for i in range(self.N):
+            header = []
+            attribute_domains = {}
+            
+            #loops through X_train and creates header
+            for i in range(len(X_train[0])) :
+                header.append("att" + str(i))
+            
+
+            #loops though header to form attribute domains dictionairy
+            count = 0
+            for item in header:
+                curr_col = myutils.get_column2(X_train, count)
+                values, counts = myutils.get_frequencies2(curr_col)
+                attribute_domains[item] = values
+                count+=1
+                
+
+            #stitching together X_train and y_train and getting available attributes
+            train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
+            available_attributes = header.copy()
+
+            boot_train = myutils.compute_bootstrapped_sample(train)
+
+            validation_set = []
+            for row in train:
+                if row not in boot_train:
+                    validation_set.append(row)
+
+
+
+            #forming tree
+            tree = myutils.tdidt_forest(boot_train, available_attributes, attribute_domains, header, self.F)
+            #print(tree)
+
+            tree_dict = {}
+            tree_dict["tree"] = tree
+            y_test = []
+            for row in validation_set:
+                y_test.append(row.pop())
+            
+            y_predict = myutils.predict_tree(validation_set, tree)
+
+            acc = myutils.get_accuracy(y_predict, y_test)
+            tree_dict["acc"] = acc
+            n_trees.append(tree_dict)
+        
+
+        sorted_trees = sorted(n_trees, key=lambda k: k['acc'], reverse=True)
+        for i in range(self.M):
+            self.trees.append(sorted_trees[i]["tree"])
+        
+
+        
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+        Args:
+            X_test(list of list of obj): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        y_predicted = []
+        for item in X_test:
+            tree_predicts = []
+            for tree in self.trees:
+                y_predict = myutils.predict_helper(item,tree)
+                tree_predicts.append(y_predict[1])
+            
+            y_predicted.append(max(set(tree_predicts), key=tree_predicts.count))
+
+        return y_predicted
