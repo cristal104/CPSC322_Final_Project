@@ -561,17 +561,13 @@ def tdidt_forest(current_instances, available_attributes, attribute_domains, hea
     
     # select an attribute to split on
     split_attribute = select_attribute2(current_instances, atts, header)
-
     # remove split attribute from available attributes
     # because, we can't split on the same attribute twice in a branch
-
     available_attributes.remove(split_attribute) # Python is pass by object reference!!
     atts.remove(split_attribute)
     tree = ["Attribute", split_attribute]
-
     # group data by attribute domains (creates pairwise disjoint partitions)
     partitions = partition_instances(current_instances, split_attribute, attribute_domains, header)
-
     # for each partition, repeat unless one of the following occurs (base case)
     Skip = False
     for attribute_value, partition in partitions.items():
@@ -585,22 +581,17 @@ def tdidt_forest(current_instances, available_attributes, attribute_domains, hea
             classification = calc_majority_leaf(partition)
             leaf_node = ["Leaf", classification]
             values_subtree.append(leaf_node)
-
         #    CASE 3: no more instances to partition (empty partition) => backtrack and replace attribute node with majority vote leaf node
         elif len(partition) == 0:
-
             values = []
             #loops trhough each current partition and further each item in the partitions
             for attribute_value, partition in partitions.items():
                 for item in partition:
-
                     #checks if the partition isn't empty and adds them to a list
                     if len(item) != 0:
                         values.append(item)
-
             #calculates the majority leaf node of the values 
             classification = calc_majority_leaf(values)
-
             #sets the current attribute to a leaf node
             tree = ["Leaf", classification]
             Skip = True
@@ -611,7 +602,6 @@ def tdidt_forest(current_instances, available_attributes, attribute_domains, hea
         if (Skip == False):
             tree.append(values_subtree)
     return tree
-
 
 def get_frequencies2(col):
     """ 
@@ -636,6 +626,8 @@ def get_frequencies2(col):
             values.append(value)
             counts.append(1)
 
+    return values, counts
+
 def group_by(table, col_index):
     """ 
     Creates subtables of table based on unique values
@@ -648,7 +640,7 @@ def group_by(table, col_index):
         group_names: list of group label names
         group_subtables: 2D list of each group subtable
     """
-    col = get_column(table, col_index)
+    col = get_column2(table, col_index)
 
     group_names = sorted(list(set(col))) # 75, 76, 77
     group_subtables = [[] for _ in group_names] # [[], [], []]
@@ -729,7 +721,7 @@ def get_accuracy(y_predicted, y_test):
     
     return correct_count / len(y_predicted)
 
-def predict_helper(X_test, tree) :
+def predict_helper(X_test, tree):
     """ 
     Helper function for predict
 
